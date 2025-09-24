@@ -1,8 +1,6 @@
 import java.time.LocalDate;
 
-public class Tarefa {
-    private int id;
-    private String titulo;
+public class Tarefa extends Membro{
     private String descricao;
     private LocalDate prazo;
     private StatusTarefa status;
@@ -10,10 +8,6 @@ public class Tarefa {
     private int projetoId; // "Link" para o ID de um Projeto
 
     // Getters e Setters para todos os atributos...
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-    public String getTitulo() { return titulo; }
-    public void setTitulo(String titulo) { this.titulo = titulo; }
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
     public LocalDate getPrazo() { return prazo; }

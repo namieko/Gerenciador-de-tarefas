@@ -156,7 +156,7 @@ public class Main {
         LocalDate prazo = LocalDate.parse(prazoStr);
 
         Tarefa novaTarefa = new Tarefa();
-        novaTarefa.setTitulo(titulo);
+        novaTarefa.setNome(titulo);
         novaTarefa.setDescricao(descricao);
         novaTarefa.setPrazo(prazo);
         novaTarefa.setProjetoId(projetoId);
@@ -171,7 +171,7 @@ public class Main {
         if (tarefas.isEmpty()) { System.out.println("Nenhuma tarefa cadastrada."); } 
         else {
             for (Tarefa t : tarefas) {
-                System.out.println("ID: " + t.getId() + " | Título: " + t.getTitulo() + 
+                System.out.println("ID: " + t.getId() + " | Título: " + t.getNome() + 
                                    " | P.ID: " + t.getProjetoId() + " | M.ID: " + t.getMembroId() + 
                                    " | Prazo: " + t.getPrazo() + " | Status: " + t.getStatus());
             }
@@ -252,7 +252,7 @@ public class Main {
                 System.out.println("Nenhuma tarefa encontrada com este status.");
             } else {
                 for (Tarefa t : tarefasFiltradas) {
-                     System.out.println("ID: " + t.getId() + " | Título: " + t.getTitulo() + 
+                     System.out.println("ID: " + t.getId() + " | Título: " + t.getNome() + 
                                        " | P.ID: " + t.getProjetoId() + " | M.ID: " + t.getMembroId() + 
                                        " | Prazo: " + t.getPrazo() + " | Status: " + t.getStatus());
                 }

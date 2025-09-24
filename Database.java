@@ -21,7 +21,7 @@ public class Database {
         }
         return conn;
     }
-
+    
     /**
      * Cria as tabelas do banco de dados se elas ainda não existirem.
      */

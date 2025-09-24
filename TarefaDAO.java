@@ -20,7 +20,7 @@ public class TarefaDAO {
         try (Connection conn = Database.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setString(1, tarefa.getTitulo());
+            pstmt.setString(1, tarefa.getNome());
             pstmt.setString(2, tarefa.getDescricao());
             // Convertemos LocalDate do Java para o tipo Date do SQL
             pstmt.setDate(3, Date.valueOf(tarefa.getPrazo())); 
@@ -30,7 +30,7 @@ public class TarefaDAO {
             pstmt.setInt(6, tarefa.getMembroId());
 
             pstmt.executeUpdate();
-            System.out.println("Tarefa '" + tarefa.getTitulo() + "' adicionada com sucesso!");
+            System.out.println("Tarefa '" + tarefa.getNome() + "' adicionada com sucesso!");
 
         } catch (SQLException e) {
             System.out.println("Erro ao adicionar tarefa: " + e.getMessage());
@@ -51,7 +51,7 @@ public class TarefaDAO {
             while (rs.next()) {
                 Tarefa tarefa = new Tarefa();
                 tarefa.setId(rs.getInt("id"));
-                tarefa.setTitulo(rs.getString("titulo"));
+                tarefa.setNome(rs.getString("titulo"));
                 tarefa.setDescricao(rs.getString("descricao"));
                 // Convertemos o Date do SQL de volta para LocalDate do Java
                 tarefa.setPrazo(rs.getDate("prazo").toLocalDate());
@@ -143,7 +143,7 @@ public class TarefaDAO {
             while (rs.next()) {
                 Tarefa tarefa = new Tarefa();
                 tarefa.setId(rs.getInt("id"));
-                tarefa.setTitulo(rs.getString("titulo"));
+                tarefa.setNome(rs.getString("titulo"));
                 tarefa.setDescricao(rs.getString("descricao"));
                 tarefa.setPrazo(rs.getDate("prazo").toLocalDate());
                 tarefa.setStatus(StatusTarefa.valueOf(rs.getString("status")));
