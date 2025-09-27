@@ -7,7 +7,9 @@ public class Main {
 
     // Movemos os DAOs e o Scanner para se tornarem variáveis estáticas da classe,
     // assim todos os nossos novos métodos podem acessá-los.
-    private static ProjetoDAO projetoDAO = new ProjetoDAO();
+    private static ProjetoController ProjetoController = new ProjetoController();
+    private static TarefaController tarefaController = new TarefaController();
+    private static UsuarioController usuarioController = new UsuarioController();
     private static MembroDAO membroDAO = new MembroDAO();
     private static TarefaDAO tarefaDAO = new TarefaDAO();
     private static Scanner scanner = new Scanner(System.in);
@@ -21,18 +23,18 @@ public class Main {
             scanner.nextLine(); 
 
             switch (opcao) {
-                case 1: adicionarNovoProjeto(); break;
-                case 2: listarProjetos(); break;
-                case 3: deletarProjeto(); break;
-                case 4: editarProjeto(); break;
-                case 5: adicionarNovoMembro(); break;
-                case 6: listarMembros(); break;
-                case 7: editarMembro(); break;
-                case 8: deletarMembro(); break;
-                case 9: criarNovaTarefa(); break;
-                case 10: listarTarefas(); break;
-                case 11: atualizarStatusTarefa(); break;
-                case 12: deletarTarefa(); break;
+                case 1: ProjetoController.adicionarNovoProjeto(); break;
+                case 2: ProjetoController.listarProjetos(); break;
+                case 3: ProjetoController.deletarProjeto(); break;
+                case 4: ProjetoController.editarProjeto(); break;
+                case 5: usuarioController.adicionarNovoMembro(); break;
+                case 6: usuarioController.listarMembros(); break;
+                case 7: usuarioController.editarMembro(); break;
+                case 8: usuarioController.deletarMembro(); break;
+                case 9: tarefaController.criarNovaTarefa(); break;
+                case 10: tarefaController.listarTarefas(); break;
+                case 11: tarefaController.atualizarStatusTarefa(); break;
+                case 12: tarefaController.deletarTarefa(); break;
                 case 13: filtrarTarefas(); break;
                 case 14: exibirPainelDeProgresso(); break;
                 case 0:
@@ -60,153 +62,6 @@ public class Main {
         System.out.println("---------------------------");
         System.out.println("[0] Sair do Programa");
         System.out.print("Escolha uma opção: ");
-    }
-
-    // --- MÉTODOS PARA PROJETOS ---
-    private static void adicionarNovoProjeto() {
-        System.out.print("Digite o nome do novo projeto: ");
-        String nome = scanner.nextLine();
-        Projeto projeto = new Projeto();
-        projeto.setNome(nome);
-        projetoDAO.adicionarProjeto(projeto);
-    }
-
-    private static void listarProjetos() {
-        List<Projeto> projetos = projetoDAO.listarTodos();
-        System.out.println("\n--- LISTA DE PROJETOS ---");
-        if (projetos.isEmpty()) { System.out.println("Nenhum projeto cadastrado."); } 
-        else { for (Projeto p : projetos) { System.out.println("ID: " + p.getId() + " | Nome: " + p.getNome()); } }
-        System.out.println("-------------------------");
-    }
-    
-    private static void deletarProjeto() {
-        System.out.print("Digite o ID do projeto que deseja deletar: ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
-        projetoDAO.deletarProjetoPorId(id);
-    }
-
-    private static void editarProjeto() {
-        System.out.print("Digite o ID do projeto que deseja editar: ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
-        System.out.print("Digite o NOVO nome para o projeto: ");
-        String novoNome = scanner.nextLine();
-        Projeto projeto = new Projeto();
-        projeto.setId(id);
-        projeto.setNome(novoNome);
-        projetoDAO.atualizarProjeto(projeto);
-    }
-
-    // --- MÉTODOS PARA MEMBROS ---
-    private static void adicionarNovoMembro() {
-        System.out.print("Digite o nome do novo membro: ");
-        String nome = scanner.nextLine();
-        Membro membro = new Membro();
-        membro.setNome(nome);
-        membroDAO.adicionarMembro(membro);
-    }
-
-    private static void listarMembros() {
-        List<Membro> membros = membroDAO.listarTodos();
-        System.out.println("\n--- LISTA DE MEMBROS ---");
-        if (membros.isEmpty()) { System.out.println("Nenhum membro cadastrado."); } 
-        else { for (Membro m : membros) { System.out.println("ID: " + m.getId() + " | Nome: " + m.getNome()); } }
-        System.out.println("------------------------");
-    }
-
-    private static void editarMembro() {
-        System.out.print("Digite o ID do membro que deseja editar: ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
-        System.out.print("Digite o NOVO nome para o membro: ");
-        String novoNome = scanner.nextLine();
-        Membro membro = new Membro();
-        membro.setId(id);
-        membro.setNome(novoNome);
-        membroDAO.atualizarMembro(membro);
-    }
-
-    private static void deletarMembro() {
-        System.out.print("Digite o ID do membro que deseja deletar: ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
-        membroDAO.deletarMembroPorId(id);
-    }
-
-    // --- MÉTODOS PARA TAREFAS ---
-    private static void criarNovaTarefa() {
-        System.out.println("\n--- CRIAR NOVA TAREFA ---");
-        listarProjetos();
-        System.out.print("Digite o ID do projeto para esta tarefa: ");
-        int projetoId = scanner.nextInt();
-        scanner.nextLine();
-
-        listarMembros();
-        System.out.print("Digite o ID do membro para atribuir esta tarefa: ");
-        int membroId = scanner.nextInt();
-        scanner.nextLine();
-
-        System.out.print("Digite o título da tarefa: ");
-        String titulo = scanner.nextLine();
-        System.out.print("Digite a descrição da tarefa: ");
-        String descricao = scanner.nextLine();
-        System.out.print("Digite o prazo (formato AAAA-MM-DD): ");
-        String prazoStr = scanner.nextLine();
-        LocalDate prazo = LocalDate.parse(prazoStr);
-
-        Tarefa novaTarefa = new Tarefa();
-        novaTarefa.setNome(titulo);
-        novaTarefa.setDescricao(descricao);
-        novaTarefa.setPrazo(prazo);
-        novaTarefa.setProjetoId(projetoId);
-        novaTarefa.setMembroId(membroId);
-        novaTarefa.setStatus(StatusTarefa.A_FAZER);
-        tarefaDAO.adicionarTarefa(novaTarefa);
-    }
-
-    private static void listarTarefas() {
-        List<Tarefa> tarefas = tarefaDAO.listarTodas();
-        System.out.println("\n--- LISTA DE TAREFAS ---");
-        if (tarefas.isEmpty()) { System.out.println("Nenhuma tarefa cadastrada."); } 
-        else {
-            for (Tarefa t : tarefas) {
-                System.out.println("ID: " + t.getId() + " | Título: " + t.getNome() + 
-                                   " | P.ID: " + t.getProjetoId() + " | M.ID: " + t.getMembroId() + 
-                                   " | Prazo: " + t.getPrazo() + " | Status: " + t.getStatus());
-            }
-        }
-        System.out.println("--------------------------");
-    }
-
-    private static void atualizarStatusTarefa() {
-        System.out.println("\n--- ATUALIZAR STATUS DA TAREFA ---");
-        listarTarefas();
-        System.out.print("Digite o ID da tarefa que deseja atualizar: ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
-
-        System.out.println("Escolha o novo status: 1:A_FAZER | 2:EM_ANDAMENTO | 3:CONCLUIDA");
-        System.out.print("Opção de status: ");
-        int statusOpcao = scanner.nextInt();
-        scanner.nextLine();
-        StatusTarefa novoStatus = null;
-        switch (statusOpcao) {
-            case 1: novoStatus = StatusTarefa.A_FAZER; break;
-            case 2: novoStatus = StatusTarefa.EM_ANDAMENTO; break;
-            case 3: novoStatus = StatusTarefa.CONCLUIDA; break;
-            default: System.out.println("Opção de status inválida."); break;
-        }
-        if (novoStatus != null) {
-            tarefaDAO.atualizarStatusTarefa(id, novoStatus);
-        }
-    }
-
-    private static void deletarTarefa() {
-        System.out.print("Digite o ID da tarefa que deseja deletar: ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
-        tarefaDAO.deletarTarefaPorId(id);
     }
 
     // --- MÉTODOS DE FILTRO ---
