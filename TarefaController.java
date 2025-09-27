@@ -1,11 +1,9 @@
 import java.util.List;
-import java.time.LocalDate; // CORREÇÃO 1: LocalDate fica no pacote java.time
-import java.time.format.DateTimeParseException; // MELHORIA: Para tratar erros de data
-import java.util.InputMismatchException;      // MELHORIA: Para tratar erros de número
-
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException; 
+import java.util.InputMismatchException;      
 public class TarefaController extends ControllerAbstract {
-    // ERRO CRÍTICO CORRIGIDO: A variável tarefaDAO nunca era inicializada.
-    // Isso causaria um NullPointerException em 100% das vezes.
+
     private static TarefaDAO tarefaDAO = new TarefaDAO();
 
     public static void criarNovaTarefa() {
@@ -50,7 +48,6 @@ public class TarefaController extends ControllerAbstract {
             System.out.println("Nenhuma tarefa cadastrada.");
         } else {
             for (Tarefa t : tarefas) {
-                // A formatação foi mantida como no original
                 System.out.println("ID: " + t.getId() + " | Título: " + t.getNome() +
                         " | P.ID: " + t.getProjetoId() + " | M.ID: " + t.getMembroId() +
                         " | Prazo: " + t.getPrazo() + " | Status: " + t.getStatus());
