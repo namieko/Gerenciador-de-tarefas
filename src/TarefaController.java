@@ -6,7 +6,7 @@ public class TarefaController extends ControllerAbstract {
 
     private static TarefaDAO tarefaDAO = new TarefaDAO();
 
-    public static void criarNovaTarefa() {
+    public void criarNovaTarefa() {
         System.out.println("\n--- CRIAR NOVA TAREFA ---");
 
         try {
@@ -41,7 +41,7 @@ public class TarefaController extends ControllerAbstract {
         }
     }
 
-    public static void listarTarefas() {
+    public void listarTarefas() {
         List<Tarefa> tarefas = tarefaDAO.listarTodas();
         System.out.println("\n--- LISTA DE TAREFAS ---");
         if (tarefas.isEmpty()) {
@@ -56,7 +56,7 @@ public class TarefaController extends ControllerAbstract {
         System.out.println("--------------------------");
     }
 
-    public static void atualizarStatusTarefa() {
+    public void atualizarStatusTarefa() {
         System.out.println("\n--- ATUALIZAR STATUS DA TAREFA ---");
         listarTarefas();
         
@@ -86,7 +86,7 @@ public class TarefaController extends ControllerAbstract {
         }
     }
 
-    public static void deletarTarefa() {
+    public void deletarTarefa() {
         listarTarefas();
         System.out.print("Digite o ID da tarefa que deseja deletar: ");
         try {

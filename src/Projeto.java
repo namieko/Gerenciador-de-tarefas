@@ -1,10 +1,9 @@
 import java.util.ArrayList;
 public class Projeto extends Membro{
-    
     private int idDono;
     private ArrayList<Integer> usuarios;
     private ArrayList<Integer> tarefas;
-    
+
     public ArrayList<Integer> getTarefas(){
         return usuarios;
     }

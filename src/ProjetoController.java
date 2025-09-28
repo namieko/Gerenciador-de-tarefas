@@ -2,7 +2,7 @@ import java.util.Scanner;
 import java.util.List;
 public class ProjetoController extends ControllerAbstract {
     //Atributos
-    private ProjetoDAO projetoDAO;
+    private static ProjetoDAO projetoDAO;
     
     ProjetoController(){
         scanner = new Scanner(System.in);
