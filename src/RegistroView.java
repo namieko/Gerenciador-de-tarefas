@@ -3,9 +3,11 @@ import java.awt.*;
 
 class RegistroView extends JPanel {
     private final GerenciadorJanelas gerenciador;
+    private final RegisterController registerController;
 
     public RegistroView(GerenciadorJanelas gerenciador) {
         this.gerenciador = gerenciador;
+        this.registerController = new RegisterController(new UsuarioDAO());
 
         setLayout(new GridBagLayout());
         setBackground(new Color(245, 245, 245));
@@ -81,7 +83,54 @@ class RegistroView extends JPanel {
             String nome = campoNome.getText();
             String email = campoEmail.getText();
             String senha = new String(campoSenha.getPassword());
-            JOptionPane.showMessageDialog(this, "Tentativa de Registro:\nNome: " + nome + "\nEmail: " + email, "Registro", JOptionPane.INFORMATION_MESSAGE);
+
+            // Validação básica
+            if (nome.trim().isEmpty() || email.trim().isEmpty() || senha.isEmpty()) {
+                JOptionPane.showMessageDialog(this, 
+                    "Por favor, preencha todos os campos!", 
+                    "Erro", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Validação de email
+            if (!registerController.validarEmail(email)) {
+                JOptionPane.showMessageDialog(this, 
+                    "Email inválido! Deve conter @ e .", 
+                    "Erro", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Validação de senha
+            if (!registerController.validarSenha(senha)) {
+                JOptionPane.showMessageDialog(this, 
+                    "Senha deve ter no mínimo 4 caracteres!", 
+                    "Erro", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Tenta registrar
+            if (registerController.registrar(nome, email, senha)) {
+                JOptionPane.showMessageDialog(this, 
+                    "Usuário registrado com sucesso!\nFaça login para continuar.", 
+                    "Sucesso", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                
+                // Limpa os campos
+                campoNome.setText("");
+                campoEmail.setText("");
+                campoSenha.setText("");
+                
+                // Volta para a tela de login
+                gerenciador.mostrarTela("login");
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Erro ao registrar usuário!\nVerifique se o email já não está cadastrado.", 
+                    "Erro", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         // Pede ao gerenciador para voltar para a tela de login

@@ -1,13 +1,13 @@
-
+import javax.swing.SwingUtilities;
 
 public class Main {
-    private static ProjetoController projetoController = new ProjetoController();
-    private static TarefaController tarefaController = new TarefaController();
-    private static UsuarioController usuarioController = new UsuarioController();
-    private static TarefaDAO tarefaDAO = new TarefaDAO();
     public static void main(String[] args) {
+        // Inicializa o banco de dados e cria as tabelas
         Database.createTables();
-        GerenciadorJanelas janela = new GerenciadorJanelas();
-
+        
+        // Inicia a interface gráfica na thread de eventos do Swing
+        SwingUtilities.invokeLater(() -> {
+            new GerenciadorJanelas();
+        });
     }
 }

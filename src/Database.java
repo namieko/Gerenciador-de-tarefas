@@ -4,17 +4,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class Database {
-    // Define o nome do arquivo do banco de dados que será criado na pasta do projeto
     private static final String URL = "jdbc:sqlite:gerenciador_tarefas.db";
 
-    /**
-     * Tenta se conectar ao banco de dados.
-     * @return um objeto de Conexão.
-     */
     public static Connection connect() {
         Connection conn = null;
         try {
-            // A "mágica" do driver JDBC acontece aqui
             conn = DriverManager.getConnection(URL);
         } catch (SQLException e) {
             System.out.println("Erro ao conectar ao banco de dados: " + e.getMessage());
@@ -22,20 +16,27 @@ public class Database {
         return conn;
     }
     
-    /**
-     * Cria as tabelas do banco de dados se elas ainda não existirem.
-     */
     public static void createTables() {
+        // SQL para criar a tabela de usuários
+        String sqlUsuarios = "CREATE TABLE IF NOT EXISTS usuarios ("
+                + " id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + " nome TEXT NOT NULL,"
+                + " email TEXT NOT NULL UNIQUE,"
+                + " senha TEXT NOT NULL"
+                + ");";
+
         // SQL para criar a tabela de projetos
         String sqlProjetos = "CREATE TABLE IF NOT EXISTS projetos ("
                 + " id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + " nome TEXT NOT NULL"
+                + " nome TEXT NOT NULL,"
+                + " id_dono INTEGER NOT NULL,"
+                + " FOREIGN KEY (id_dono) REFERENCES usuarios (id)"
                 + ");";
 
         // SQL para criar a tabela de membros
         String sqlMembros = "CREATE TABLE IF NOT EXISTS membros ("
                 + " id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + " nome TEXT NOT NULL "
+                + " nome TEXT NOT NULL"
                 + ");";
 
         // SQL para criar a tabela de tarefas
@@ -48,30 +49,28 @@ public class Database {
                 + " membro_id INTEGER,"
                 + " projeto_id INTEGER NOT NULL,"
                 + " FOREIGN KEY (membro_id) REFERENCES membros (id),"
-                + " FOREIGN KEY (projeto_id) REFERENCES projetos (id)"
+                + " FOREIGN KEY (projeto_id) REFERENCES projetos (id) ON DELETE CASCADE"
+                + ");";
+
+        // SQL para criar a tabela de comentários (Caso de Uso 10)
+        String sqlComentarios = "CREATE TABLE IF NOT EXISTS comentarios ("
+                + " id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + " tarefa_id INTEGER NOT NULL,"
+                + " texto TEXT NOT NULL,"
+                + " autor_id INTEGER NOT NULL,"
+                + " data_hora DATE NOT NULL,"
+                + " FOREIGN KEY (tarefa_id) REFERENCES tarefas (id) ON DELETE CASCADE,"
+                + " FOREIGN KEY (autor_id) REFERENCES usuarios (id)"
                 + ");";
 
         try (Connection conn = connect();
              Statement stmt = conn.createStatement()) {
-            // Executa os três comandos SQL para criar as tabelas
+            stmt.execute(sqlUsuarios);
             stmt.execute(sqlProjetos);
             stmt.execute(sqlMembros);
             stmt.execute(sqlTarefas);
-        } catch (SQLException e) {
-            System.out.println("Erro ao criar as tabelas: " + e.getMessage());
-        }
-        
-        String sqlUsuarios = "CREATE TABLE IF NOT EXISTS usuarios ("
-                + " id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + " nome TEXT NOT NULL,"
-                + " email TEXT NOT NULL UNIQUE," // E-mail será o nosso login e não pode repetir
-                + " senha TEXT NOT NULL"
-                + ");";
-        
-        try (Connection conn = connect();
-             Statement stmt = conn.createStatement()) {
-            // ... (stmt.execute para as outras tabelas)
-            stmt.execute(sqlUsuarios); // Adicione esta linha
+            stmt.execute(sqlComentarios);
+            System.out.println("Tabelas criadas/verificadas com sucesso!");
         } catch (SQLException e) {
             System.out.println("Erro ao criar as tabelas: " + e.getMessage());
         }

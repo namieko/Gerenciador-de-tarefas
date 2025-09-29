@@ -1,10 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
+
 class LoginView extends JPanel {
     private final GerenciadorJanelas gerenciador;
+    private final LoginController loginController;
 
     public LoginView(GerenciadorJanelas gerenciador) {
         this.gerenciador = gerenciador;
+        this.loginController = new LoginController(new UsuarioDAO());
 
         setLayout(new GridBagLayout());
         setBackground(new Color(245, 245, 245));
@@ -54,7 +57,7 @@ class LoginView extends JPanel {
         JButton botaoRegistrar = new JButton("Registrar-se");
         painelBotoes.add(botaoEntrar);
         painelBotoes.add(botaoRegistrar);
-        painelBotoes.setBackground(getBackground()); // Mantém a cor de fundo
+        painelBotoes.setBackground(getBackground());
 
         gbc.gridx = 0;
         gbc.gridy = 3;
@@ -62,12 +65,48 @@ class LoginView extends JPanel {
         gbc.anchor = GridBagConstraints.CENTER;
         add(painelBotoes, gbc);
 
-
         // --- Ações dos botões ---
         botaoEntrar.addActionListener(e -> {
             String email = campoEmail.getText();
             String senha = new String(campoSenha.getPassword());
-            JOptionPane.showMessageDialog(this, "Email: " + email + "\nSenha: " + senha, "Tentativa de Login", JOptionPane.INFORMATION_MESSAGE);
+
+            // Validação básica
+            if (email.trim().isEmpty() || senha.isEmpty()) {
+                JOptionPane.showMessageDialog(this, 
+                    "Por favor, preencha todos os campos!", 
+                    "Erro", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Cria objeto usuário com os dados do formulário
+            Usuario usuario = new Usuario();
+            usuario.setEmail(email);
+            usuario.setSenha(senha);
+
+            // Tenta fazer login
+            if (loginController.login(usuario)) {
+                // Busca o usuário completo do banco
+                UsuarioDAO usuarioDAO = new UsuarioDAO();
+                Usuario usuarioLogado = usuarioDAO.buscarPorEmail(email);
+                
+                JOptionPane.showMessageDialog(this, 
+                    "Login realizado com sucesso!\nBem-vindo, " + usuarioLogado.getNome() + "!", 
+                    "Sucesso", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                
+                // Redireciona para a tela de projetos
+                gerenciador.fazerLogin(usuarioLogado.getId());
+                
+                // Limpa os campos
+                campoEmail.setText("");
+                campoSenha.setText("");
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Email ou senha incorretos!", 
+                    "Erro de Login", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         // Pede ao gerenciador para mostrar a tela de registro
