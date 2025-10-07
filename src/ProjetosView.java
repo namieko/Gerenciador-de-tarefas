@@ -5,13 +5,13 @@ import java.util.List;
 class ProjetosView extends JPanel {
     private final GerenciadorJanelas gerenciador;
     private final int idUsuario;
-    private final ProjetoDAO projetoDAO;
+    private final ProjetoController projetoController;
     private final JPanel painelProjetos;
 
     public ProjetosView(GerenciadorJanelas gerenciador, int idUsuario) {
         this.gerenciador = gerenciador;
         this.idUsuario = idUsuario;
-        this.projetoDAO = new ProjetoDAO();
+        this.projetoController = new ProjetoController();
 
         setLayout(new BorderLayout(10, 10));
         setBackground(new Color(245, 245, 245));
@@ -61,9 +61,11 @@ class ProjetosView extends JPanel {
 
     private void carregarProjetos() {
         painelProjetos.removeAll();
-        List<Projeto> projetos = projetoDAO.listarTodosPorUsuario(idUsuario);
+        
+        
+        List<Projeto> projetos = projetoController.listarProjetosPorUsuario(idUsuario);
 
-        if (projetos.isEmpty()) {
+        if (projetos == null || projetos.isEmpty()) {
             JLabel labelVazio = new JLabel("Nenhum projeto cadastrado. Crie seu primeiro projeto!");
             labelVazio.setFont(new Font("Arial", Font.ITALIC, 14));
             labelVazio.setForeground(Color.GRAY);
@@ -127,11 +129,17 @@ class ProjetosView extends JPanel {
         String nome = JOptionPane.showInputDialog(this, "Nome do projeto:", "Novo Projeto", JOptionPane.PLAIN_MESSAGE);
         
         if (nome != null && !nome.trim().isEmpty()) {
-            Projeto projeto = new Projeto();
-            projeto.setNome(nome.trim());
-            projeto.setDono(idUsuario);
-            projetoDAO.adicionarProjeto(projeto);
-            carregarProjetos();
+            
+            boolean sucesso = projetoController.adicionarNovoProjeto(nome, idUsuario);
+            
+            if (sucesso) {
+                carregarProjetos();
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Erro ao criar projeto!", 
+                    "Erro", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -139,9 +147,17 @@ class ProjetosView extends JPanel {
         String novoNome = JOptionPane.showInputDialog(this, "Novo nome do projeto:", projeto.getNome());
         
         if (novoNome != null && !novoNome.trim().isEmpty()) {
-            projeto.setNome(novoNome.trim());
-            projetoDAO.atualizarProjeto(projeto);
-            carregarProjetos();
+           
+            boolean sucesso = projetoController.editarProjeto(projeto.getId(), novoNome);
+            
+            if (sucesso) {
+                carregarProjetos();
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Erro ao editar projeto!", 
+                    "Erro", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -153,8 +169,17 @@ class ProjetosView extends JPanel {
             JOptionPane.WARNING_MESSAGE);
 
         if (confirmacao == JOptionPane.YES_OPTION) {
-            projetoDAO.deletarProjetoPorId(projeto.getId());
-            carregarProjetos();
+            
+            boolean sucesso = projetoController.deletarProjeto(projeto.getId());
+            
+            if (sucesso) {
+                carregarProjetos();
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Erro ao deletar projeto!", 
+                    "Erro", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
