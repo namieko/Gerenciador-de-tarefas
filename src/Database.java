@@ -30,6 +30,8 @@ public class Database {
         criarTabelaTarefas();
         criarTabelaComentarios();
         criarTabelaRegistrosTempo();
+        criarTabelaAmizades();
+        criarTabelaConvitesProjeto();
         
         System.out.println("\n=================================");
         System.out.println("Todas as tabelas foram criadas/verificadas com sucesso!");

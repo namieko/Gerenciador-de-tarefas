@@ -6,12 +6,14 @@ class ProjetosView extends JPanel {
     private final GerenciadorJanelas gerenciador;
     private final int idUsuario;
     private final ProjetoController projetoController;
+    private final ConviteProjetoController conviteProjetoController;
     private final JPanel painelProjetos;
 
     public ProjetosView(GerenciadorJanelas gerenciador, int idUsuario) {
         this.gerenciador = gerenciador;
         this.idUsuario = idUsuario;
         this.projetoController = new ProjetoController();
+        this.conviteProjetoController = new ConviteProjetoController();
 
         setLayout(new BorderLayout(10, 10));
         setBackground(new Color(245, 245, 245));
@@ -26,9 +28,28 @@ class ProjetosView extends JPanel {
         labelTitulo.setForeground(Color.WHITE);
         painelSuperior.add(labelTitulo, BorderLayout.WEST);
 
+        // Painel de botões à direita
+        JPanel painelBotoesSuperiores = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        painelBotoesSuperiores.setBackground(new Color(63, 81, 181));
+
+        JButton botaoAmigos = new JButton("👥 Amigos");
+        botaoAmigos.setBackground(new Color(76, 175, 80));
+        botaoAmigos.setForeground(Color.WHITE);
+        botaoAmigos.addActionListener(e -> abrirTelaAmigos());
+
+        JButton botaoNotificacoes = new JButton("🔔 Notificações");
+        botaoNotificacoes.setBackground(new Color(255, 152, 0));
+        botaoNotificacoes.setForeground(Color.WHITE);
+        botaoNotificacoes.addActionListener(e -> abrirNotificacoes());
+
         JButton botaoLogout = new JButton("Logout");
         botaoLogout.addActionListener(e -> gerenciador.fazerLogout());
-        painelSuperior.add(botaoLogout, BorderLayout.EAST);
+
+        painelBotoesSuperiores.add(botaoAmigos);
+        painelBotoesSuperiores.add(botaoNotificacoes);
+        painelBotoesSuperiores.add(botaoLogout);
+
+        painelSuperior.add(painelBotoesSuperiores, BorderLayout.EAST);
 
         add(painelSuperior, BorderLayout.NORTH);
 
@@ -62,28 +83,60 @@ class ProjetosView extends JPanel {
     private void carregarProjetos() {
         painelProjetos.removeAll();
         
+        // Carrega projetos próprios
+        List<Projeto> projetosProprios = projetoController.listarProjetosPorUsuario(idUsuario);
         
-        List<Projeto> projetos = projetoController.listarProjetosPorUsuario(idUsuario);
+        // Carrega projetos onde é colaborador
+        List<Projeto> projetosColaborador = conviteProjetoController.listarProjetosColaborador(idUsuario);
 
-        if (projetos == null || projetos.isEmpty()) {
+        boolean temProjetos = false;
+
+        if (projetosProprios != null && !projetosProprios.isEmpty()) {
+            JLabel labelMeusProjetos = new JLabel("Meus Projetos");
+            labelMeusProjetos.setFont(new Font("Arial", Font.BOLD, 16));
+            labelMeusProjetos.setAlignmentX(Component.LEFT_ALIGNMENT);
+            painelProjetos.add(labelMeusProjetos);
+            painelProjetos.add(Box.createVerticalStrut(10));
+
+            for (Projeto projeto : projetosProprios) {
+                painelProjetos.add(criarCardProjeto(projeto, true));
+                painelProjetos.add(Box.createVerticalStrut(10));
+            }
+            temProjetos = true;
+        }
+
+        if (projetosColaborador != null && !projetosColaborador.isEmpty()) {
+            if (temProjetos) {
+                painelProjetos.add(Box.createVerticalStrut(20));
+            }
+
+            JLabel labelColaborador = new JLabel("Projetos Colaborando");
+            labelColaborador.setFont(new Font("Arial", Font.BOLD, 16));
+            labelColaborador.setAlignmentX(Component.LEFT_ALIGNMENT);
+            painelProjetos.add(labelColaborador);
+            painelProjetos.add(Box.createVerticalStrut(10));
+
+            for (Projeto projeto : projetosColaborador) {
+                painelProjetos.add(criarCardProjeto(projeto, false));
+                painelProjetos.add(Box.createVerticalStrut(10));
+            }
+            temProjetos = true;
+        }
+
+        if (!temProjetos) {
             JLabel labelVazio = new JLabel("Nenhum projeto cadastrado. Crie seu primeiro projeto!");
             labelVazio.setFont(new Font("Arial", Font.ITALIC, 14));
             labelVazio.setForeground(Color.GRAY);
             labelVazio.setAlignmentX(Component.CENTER_ALIGNMENT);
             painelProjetos.add(Box.createVerticalStrut(50));
             painelProjetos.add(labelVazio);
-        } else {
-            for (Projeto projeto : projetos) {
-                painelProjetos.add(criarCardProjeto(projeto));
-                painelProjetos.add(Box.createVerticalStrut(10));
-            }
         }
 
         painelProjetos.revalidate();
         painelProjetos.repaint();
     }
 
-    private JPanel criarCardProjeto(Projeto projeto) {
+    private JPanel criarCardProjeto(Projeto projeto, boolean ehDono) {
         JPanel card = new JPanel(new BorderLayout(10, 10));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
@@ -92,10 +145,22 @@ class ProjetosView extends JPanel {
         ));
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 
-        // Nome do projeto
+        // Nome do projeto com badge se for colaborador
+        JPanel painelNome = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        painelNome.setBackground(Color.WHITE);
+        
         JLabel labelNome = new JLabel(projeto.getNome());
         labelNome.setFont(new Font("Arial", Font.BOLD, 16));
-        card.add(labelNome, BorderLayout.WEST);
+        painelNome.add(labelNome);
+
+        if (!ehDono) {
+            JLabel labelColaborador = new JLabel(" [Colaborador]");
+            labelColaborador.setFont(new Font("Arial", Font.ITALIC, 12));
+            labelColaborador.setForeground(new Color(255, 152, 0));
+            painelNome.add(labelColaborador);
+        }
+
+        card.add(painelNome, BorderLayout.WEST);
 
         // Painel de botões
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
@@ -106,19 +171,28 @@ class ProjetosView extends JPanel {
         botaoAbrir.setForeground(Color.WHITE);
         botaoAbrir.setFocusPainted(false);
         botaoAbrir.addActionListener(e -> abrirProjeto(projeto));
-
-        JButton botaoEditar = new JButton("Editar");
-        botaoEditar.addActionListener(e -> editarProjeto(projeto));
-
-        JButton botaoDeletar = new JButton("Deletar");
-        botaoDeletar.setBackground(new Color(244, 67, 54));
-        botaoDeletar.setForeground(Color.WHITE);
-        botaoDeletar.setFocusPainted(false);
-        botaoDeletar.addActionListener(e -> deletarProjeto(projeto));
-
         painelBotoes.add(botaoAbrir);
-        painelBotoes.add(botaoEditar);
-        painelBotoes.add(botaoDeletar);
+
+        // Apenas o dono pode editar, deletar e convidar
+        if (ehDono) {
+            JButton botaoConvidar = new JButton("Convidar");
+            botaoConvidar.setBackground(new Color(156, 39, 176));
+            botaoConvidar.setForeground(Color.WHITE);
+            botaoConvidar.setFocusPainted(false);
+            botaoConvidar.addActionListener(e -> convidarParaProjeto(projeto));
+            painelBotoes.add(botaoConvidar);
+
+            JButton botaoEditar = new JButton("Editar");
+            botaoEditar.addActionListener(e -> editarProjeto(projeto));
+            painelBotoes.add(botaoEditar);
+
+            JButton botaoDeletar = new JButton("Deletar");
+            botaoDeletar.setBackground(new Color(244, 67, 54));
+            botaoDeletar.setForeground(Color.WHITE);
+            botaoDeletar.setFocusPainted(false);
+            botaoDeletar.addActionListener(e -> deletarProjeto(projeto));
+            painelBotoes.add(botaoDeletar);
+        }
 
         card.add(painelBotoes, BorderLayout.EAST);
 
@@ -129,7 +203,7 @@ class ProjetosView extends JPanel {
         String nome = JOptionPane.showInputDialog(this, "Nome do projeto:", "Novo Projeto", JOptionPane.PLAIN_MESSAGE);
         
         if (nome != null && !nome.trim().isEmpty()) {
-            
+            // Usa o Controller em vez do DAO
             boolean sucesso = projetoController.adicionarNovoProjeto(nome, idUsuario);
             
             if (sucesso) {
@@ -147,7 +221,7 @@ class ProjetosView extends JPanel {
         String novoNome = JOptionPane.showInputDialog(this, "Novo nome do projeto:", projeto.getNome());
         
         if (novoNome != null && !novoNome.trim().isEmpty()) {
-           
+            // Usa o Controller em vez do DAO
             boolean sucesso = projetoController.editarProjeto(projeto.getId(), novoNome);
             
             if (sucesso) {
@@ -169,7 +243,7 @@ class ProjetosView extends JPanel {
             JOptionPane.WARNING_MESSAGE);
 
         if (confirmacao == JOptionPane.YES_OPTION) {
-            
+            // Usa o Controller em vez do DAO
             boolean sucesso = projetoController.deletarProjeto(projeto.getId());
             
             if (sucesso) {
@@ -197,5 +271,82 @@ class ProjetosView extends JPanel {
         
         gerenciador.painelPrincipal.add("tarefas", telaTarefas);
         gerenciador.mostrarTela("tarefas");
+    }
+
+    private void convidarParaProjeto(Projeto projeto) {
+        AmizadeController amizadeController = new AmizadeController();
+        List<Usuario> amigos = amizadeController.listarAmigos(idUsuario);
+
+        if (amigos == null || amigos.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Você não tem amigos para convidar.\nAdicione amigos primeiro!",
+                "Sem Amigos",
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String[] nomesAmigos = new String[amigos.size()];
+        for (int i = 0; i < amigos.size(); i++) {
+            nomesAmigos[i] = amigos.get(i).getNome() + " (" + amigos.get(i).getEmail() + ")";
+        }
+
+        String selecionado = (String) JOptionPane.showInputDialog(this,
+            "Selecione um amigo para convidar:",
+            "Convidar para " + projeto.getNome(),
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            nomesAmigos,
+            nomesAmigos[0]);
+
+        if (selecionado != null) {
+            int indice = java.util.Arrays.asList(nomesAmigos).indexOf(selecionado);
+            Usuario amigoSelecionado = amigos.get(indice);
+
+            boolean sucesso = conviteProjetoController.enviarConvite(
+                projeto.getId(),
+                idUsuario,
+                amigoSelecionado.getId()
+            );
+
+            if (sucesso) {
+                JOptionPane.showMessageDialog(this,
+                    "Convite enviado para " + amigoSelecionado.getNome() + "!",
+                    "Sucesso",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                    "Erro ao enviar convite!",
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void abrirTelaAmigos() {
+        AmigosView telaAmigos = new AmigosView(gerenciador, idUsuario);
+        
+        Component[] components = gerenciador.painelPrincipal.getComponents();
+        for (Component comp : components) {
+            if (comp instanceof AmigosView) {
+                gerenciador.painelPrincipal.remove(comp);
+            }
+        }
+        
+        gerenciador.painelPrincipal.add("amigos", telaAmigos);
+        gerenciador.mostrarTela("amigos");
+    }
+
+    private void abrirNotificacoes() {
+        NotificacoesView telaNotificacoes = new NotificacoesView(gerenciador, idUsuario);
+        
+        Component[] components = gerenciador.painelPrincipal.getComponents();
+        for (Component comp : components) {
+            if (comp instanceof NotificacoesView) {
+                gerenciador.painelPrincipal.remove(comp);
+            }
+        }
+        
+        gerenciador.painelPrincipal.add("notificacoes", telaNotificacoes);
+        gerenciador.mostrarTela("notificacoes");
     }
 }
