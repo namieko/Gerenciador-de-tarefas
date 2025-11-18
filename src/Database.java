@@ -134,6 +134,45 @@ public class Database {
     }
 
     /**
+     * Cria a tabela de amizades.
+     * Sistema de amigos - usuários podem adicionar outros usuários como amigos
+     */
+    private static void criarTabelaAmizades() {
+        String sql = "CREATE TABLE IF NOT EXISTS amizades ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "usuario_id INTEGER NOT NULL,"
+                + "amigo_id INTEGER NOT NULL,"
+                + "status TEXT NOT NULL," // PENDENTE, ACEITO, RECUSADO
+                + "data_solicitacao DATE NOT NULL,"
+                + "FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE CASCADE,"
+                + "FOREIGN KEY (amigo_id) REFERENCES usuarios (id) ON DELETE CASCADE,"
+                + "UNIQUE(usuario_id, amigo_id)"
+                + ");";
+
+        executarSQL(sql, "amizades");
+    }
+
+    /**
+     * Cria a tabela de convites para projetos.
+     * Sistema de convites - donos de projetos podem convidar amigos para participar
+     */
+    private static void criarTabelaConvitesProjeto() {
+        String sql = "CREATE TABLE IF NOT EXISTS convites_projeto ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "projeto_id INTEGER NOT NULL,"
+                + "remetente_id INTEGER NOT NULL,"
+                + "destinatario_id INTEGER NOT NULL,"
+                + "status TEXT NOT NULL," // PENDENTE, ACEITO, RECUSADO
+                + "data_convite DATE NOT NULL,"
+                + "FOREIGN KEY (projeto_id) REFERENCES projetos (id) ON DELETE CASCADE,"
+                + "FOREIGN KEY (remetente_id) REFERENCES usuarios (id) ON DELETE CASCADE,"
+                + "FOREIGN KEY (destinatario_id) REFERENCES usuarios (id) ON DELETE CASCADE"
+                + ");";
+
+        executarSQL(sql, "convites_projeto");
+    }
+
+    /**
      * Método auxiliar para executar SQL e exibir mensagem de sucesso.
      */
     private static void executarSQL(String sql, String nomeTabela) {
